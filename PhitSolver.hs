@@ -69,6 +69,8 @@ renderSolution board solution = unlines $ P.map renderRow $ splitRows finalRende
 main = do
     inp <- getContents
     let ps = P.map loadPiece (pieces $ lines inp)
-        solution = solve (head ps) (tail ps) []
+        board = head ps
+        availablePieces = tail ps
+        solution = solve board availablePieces []
     putStrLn $ case solution of Nothing -> "No solution found."
                                 Just s  -> renderSolution (head ps) s
