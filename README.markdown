@@ -1,5 +1,7 @@
 # PhitSolver
 
+## What
+
 PhitSolver is a Haskell program to solve puzzles from the Phit Droid puzzle game
 on Android (http://www.mtoy.biz/phitdroid2ndEdition.html).
 

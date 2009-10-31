@@ -12,30 +12,28 @@ data Tile = Tile { tileX :: Int
 type Piece = Set Tile
 type Board = Piece
 
-dimension :: Piece -> (Tile -> Int) -> Int
-dimension piece f = (findMax xs)
+dimension :: (Tile -> Int) -> Piece -> Int
+dimension f piece = (findMax xs)
     where xs = S.map f piece
 
 width :: Piece -> Int
-width piece = dimension piece tileX
+width = dimension tileX
 
 height :: Piece -> Int
-height piece = dimension piece tileY
+height = dimension tileY
 
 validPositions :: Board -> Piece -> [Piece]
 validPositions board piece = P.filter (canPutPiece board) positions
     where positions = P.map (\(x, y) -> translate piece x y) coords
           coords = [(x, y) | x <- [0 .. (width board) - (width piece)],
                              y <- [0 .. (height board) - (height piece)]]
-          translate piece x y = S.map (translate' x y) piece
-          translate' x y tile = Tile (tileX tile + x)
-                                 (tileY tile + y)
+          translate piece x y = S.map (\(Tile tx ty) -> Tile (tx + x) (ty + y)) piece
           canPutPiece board piece = all (flip member board) (toList piece)
 
 
 solve :: Board -> [Piece] -> [Piece] -> Maybe [Piece]
 solve board left added | P.null left = Just added
-                       | otherwise         = (foldr mplus Nothing) solutions
+                       | otherwise         = foldr mplus Nothing solutions
     where solutions = P.map solve' positions
           solve' piece = solve (putPiece board piece) (tail left) (piece:added)
           positions = validPositions board (head left)
@@ -47,7 +45,7 @@ loadPiece lines = fromList $ P.map toTile coords
           toTile (c, x, y) = Tile x y
           isTile (c, x, y) = c == '#'
           numberLines = zip lines [1..]
-          numberCols (line, lineNumber) = zipWith (\c -> \n -> (c, n, lineNumber)) line [1..]
+          numberCols (line, lineNumber) = zipWith (\c n -> (c, n, lineNumber)) line [1..]
 
 pieces :: [String] -> [[String]]
 pieces = removeCrap . groupBy (\a b -> b /= "")
@@ -66,11 +64,12 @@ renderSolution board solution = unlines $ P.map renderRow $ splitRows finalRende
                                                                        else (c, x, y)
           characters = ['a' .. 'z'] ++ ['0' .. '9'] ++ ['A' .. 'Z']
 
-main = do
-    inp <- getContents
-    let ps = P.map loadPiece (pieces $ lines inp)
-        board = head ps
-        availablePieces = tail ps
-        solution = solve board availablePieces []
-    putStrLn $ case solution of Nothing -> "No solution found."
-                                Just s  -> renderSolution (head ps) s
+solvePhit :: String -> String
+solvePhit input = case solution of Nothing -> "No solution found."
+                                   Just s  -> renderSolution board s
+    where ps = P.map loadPiece(pieces $ lines input)
+          board = head ps
+          availablePieces = tail ps
+          solution = solve board availablePieces []
+
+main = interact solvePhit
