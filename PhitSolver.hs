@@ -44,8 +44,8 @@ loadPiece lines = fromList $ P.map toTile coords
     where coords = P.filter isTile $ concat $ P.map numberCols numberLines
           toTile (c, x, y) = Tile x y
           isTile (c, x, y) = c == '#'
-          numberLines = zip lines [1..]
-          numberCols (line, lineNumber) = zipWith (\c n -> (c, n, lineNumber)) line [1..]
+          numberLines = zip lines [1 ..]
+          numberCols (line, lineNumber) = zipWith (\c n -> (c, n, lineNumber)) line [1 ..]
 
 pieces :: [String] -> [[String]]
 pieces = removeCrap . groupBy (\a b -> b /= "")
@@ -62,7 +62,7 @@ renderSolution board solution = unlines $ P.map renderRow $ splitRows finalRende
           renderPiece (piece, char) r = P.map (renderTile char piece) r
           renderTile char piece (c, x, y) = if Tile x y `member` piece then (char, x, y)
                                                                        else (c, x, y)
-          characters = ['a' .. 'z'] ++ ['0' .. '9'] ++ ['A' .. 'Z']
+          characters = concat $ repeat $ ['a' .. 'z'] ++ ['0' .. '9'] ++ ['A' .. 'Z']
 
 solvePhit :: String -> String
 solvePhit input = case solution of Nothing -> "No solution found."
