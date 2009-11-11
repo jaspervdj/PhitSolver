@@ -23,20 +23,20 @@ height :: Piece -> Int
 height = dimension tileY
 
 validPositions :: Board -> Piece -> [Piece]
-validPositions board piece = P.filter (canPutPiece board) positions
-    where positions = P.map (\(x, y) -> translate piece x y) coords
-          coords = [(x, y) | x <- [0 .. (width board) - (width piece)],
-                             y <- [0 .. (height board) - (height piece)]]
-          translate piece x y = S.map (\(Tile tx ty) -> Tile (tx + x) (ty + y)) piece
-          canPutPiece board piece = all (flip member board) (toList piece)
+validPositions board piece = P.filter (canPutPiece board) allPositions
+    where allPositions = P.map (translate piece) allCoords
+          allCoords = [(x, y) | x <- [0 .. (width board) - (width piece)],
+                                y <- [0 .. (height board) - (height piece)]]
+          translate piece (x, y) = S.map (\(Tile tx ty) -> Tile (tx + x) (ty + y)) piece
+          canPutPiece board piece = all (`member` board) (toList piece)
 
 
 solve :: Board -> [Piece] -> [Piece] -> Maybe [Piece]
-solve board left added | P.null left = Just added
-                       | otherwise         = foldr mplus Nothing solutions
+solve board piecesLeft added | P.null piecesLeft = Just added
+                             | otherwise         = foldr mplus Nothing solutions
     where solutions = P.map solve' positions
-          solve' piece = solve (putPiece board piece) (tail left) (piece:added)
-          positions = validPositions board (head left)
+          solve' piece = solve (putPiece board piece) (tail piecesLeft) (piece:added)
+          positions = validPositions board (head piecesLeft)
           putPiece board piece = board \\ piece
 
 loadPiece :: [String] -> Piece
